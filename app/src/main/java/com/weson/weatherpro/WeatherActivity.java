@@ -6,6 +6,9 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -29,9 +32,9 @@ import okhttp3.Response;
 
 public class WeatherActivity extends Activity {
 
-    //public DrawerLayout drawerLayout;
+    public DrawerLayout drawerLayout;
 
-   // public SwipeRefreshLayout swipeRefresh;
+    public SwipeRefreshLayout swipeRefresh;
 
     private ScrollView weatherLayout;
 
@@ -93,6 +96,18 @@ public class WeatherActivity extends Activity {
             //调用方法去服务器请求天气数据
             requestWeather(mWeatherId);
         }
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                requestWeather(mWeatherId);
+            }
+        });
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
         String bingPic = prefs.getString("bing_pic", null);
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
@@ -117,9 +132,9 @@ public class WeatherActivity extends Activity {
         comfortText = (TextView) findViewById(R.id.comfort_text);
         carWashText = (TextView) findViewById(R.id.car_wash_text);
         sportText = (TextView) findViewById(R.id.sport_text);
-        //swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
-        //swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
-        //drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navButton = (Button) findViewById(R.id.nav_button);
     }
 
@@ -160,6 +175,7 @@ public class WeatherActivity extends Activity {
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",
                                     Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
 
