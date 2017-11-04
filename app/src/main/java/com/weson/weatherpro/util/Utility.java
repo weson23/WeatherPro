@@ -2,9 +2,11 @@ package com.weson.weatherpro.util;
 
 import android.text.TextUtils;
 
+import com.google.gson.Gson;
 import com.weson.weatherpro.database.City;
 import com.weson.weatherpro.database.County;
 import com.weson.weatherpro.database.Province;
+import com.weson.weatherpro.gson.Weather;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -115,17 +117,19 @@ public class Utility {
      * @return
      * 将返回的JSON数据解析成Weather实体类
      */
-    /*public static Weather handleWeatherResponse(String response) {
+    public static Weather handleWeatherResponse(String response) {
 
         try {
+            //先是利用JSONObject来获取对象，再利用对象来获取jsonArray
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather");
+            //再利用jsonArray获得到数据的主体HeWeather里面的内容weatherContent
             String weatherContent = jsonArray.getJSONObject(0).toString();
             return new Gson().fromJson(weatherContent, Weather.class);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
-    }*/
+    }
 
 }
