@@ -1,6 +1,7 @@
 package com.weson.weatherpro;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -252,8 +253,8 @@ public class WeatherActivity extends Activity {
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
         //设置在后台自动更新天气信息
-        //Intent intent = new Intent(this, AutoUpdateService.class);
-        //startService(intent);
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
 
     }
 
