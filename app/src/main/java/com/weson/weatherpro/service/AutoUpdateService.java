@@ -1,4 +1,4 @@
-package com.weson.weatherpro;
+package com.weson.weatherpro.service;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;

@@ -7,7 +7,7 @@
     <application
         android:name="org.litepal.LitePalApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/logo"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -21,9 +21,8 @@
         </activity>
         <activity android:name=".WeatherActivity">
         </activity>
-
         <service
-            android:name=".AutoUpdateService"
+            android:name=".service.AutoUpdateService"
             android:enabled="true"
             android:exported="true">
         </service>

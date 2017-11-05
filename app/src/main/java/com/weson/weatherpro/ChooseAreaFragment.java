@@ -47,9 +47,10 @@ public class ChooseAreaFragment extends Fragment {
 
     private ListView listView;
 
-    private ArrayAdapter adapter;
+    private ArrayAdapter<String> adapter;
 
     private List<String> dataList = new ArrayList<>();
+
     /**
      * 省列表
      */
@@ -79,7 +80,6 @@ public class ChooseAreaFragment extends Fragment {
      * 当前选中的级别
      */
     private int currentLevel;
-
 
     /**
      * onCreateView方法进行控件的实例化，初始化ArrayAdapter，设置适配器
@@ -114,19 +114,20 @@ public class ChooseAreaFragment extends Fragment {
                     //调用查询县的方法
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
+                    //通过集合获得weatherId
                     String weatherId = countyList.get(position).getWeatherId();
                     if (getActivity() instanceof MainActivity) {
-                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                    intent.putExtra("weather_id", weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
-                } else if (getActivity() instanceof WeatherActivity) {
+                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        intent.putExtra("weather_id", weatherId);
+                        startActivity(intent);
+                        getActivity().finish();
+                    } else if (getActivity() instanceof WeatherActivity) {
                         WeatherActivity activity = (WeatherActivity) getActivity();
                         activity.drawerLayout.closeDrawers();
                         activity.swipeRefresh.setRefreshing(true);
                         activity.requestWeather(weatherId);
                     }
-            }
+                }
             }
         });
         //设置返回按键的点击事件
@@ -169,7 +170,6 @@ public class ChooseAreaFragment extends Fragment {
             //表示将列表移动到指定的0位置处
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
-
         } else {
             //通过网址去服务器寻找数据
             String address = "http://guolin.tech/api/china";
@@ -185,8 +185,7 @@ public class ChooseAreaFragment extends Fragment {
         titleText.setText(selectedProvince.getProvinceName());
         //设置backButton为可见
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid=？", String.valueOf(
-                selectedProvince.getId())).find(City.class);
+        cityList = DataSupport.where("provinceid = ?", String.valueOf(selectedProvince.getId())).find(City.class);
         if (cityList.size() > 0) {
             dataList.clear();
             for (City city : cityList) {
@@ -213,8 +212,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties() {
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = DataSupport.where("cityid=？", String.valueOf(
-                selectedCity.getId())).find(County.class);
+        countyList = DataSupport.where("cityid = ?", String.valueOf(selectedCity.getId())).find(County.class);
         if (countyList.size() > 0) {
             dataList.clear();
             for (County county : countyList) {
@@ -235,41 +233,27 @@ public class ChooseAreaFragment extends Fragment {
         }
     }
 
+    /**
+     * 根据传入的地址和类型从服务器上查询省市县数据。
+     */
     private void queryFromServer(String address, final String type) {
         //显示获取数据的进度条的方法
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
-            //失败的回调方法
-            @Override
-            public void onFailure(Call call, IOException e) {
-                // 通过runOnUiThread()方法回到主线程处理逻辑
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        closeProgressDialog();
-                        Toast.makeText(getContext(),
-                                "加载数据失败", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            // 成功的回调方法
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 //得到服务器返回的数据，进行数据装换成string类型
-                String responseText = response.body().toString();
+                String responseText = response.body().string();
                 boolean result = false;
                 if ("province".equals(type)) {
                     //将从服务器返回的省份的数据进行解析，将数据保存到数据库中，返回Boolean类型值
                     result = Utility.handleProvinceResponse(responseText);
                 } else if ("city".equals(type)) {
                     //将从服务器返回的城市的数据进行解析，将数据保存到数据库中，返回Boolean类型值
-                    result = Utility.handleCityResponse(responseText,
-                            selectedProvince.getId());
+                    result = Utility.handleCityResponse(responseText, selectedProvince.getId());
                 } else if ("county".equals(type)) {
                     //将从服务器返回的县的数据进行解析，将数据保存到数据库中，返回Boolean类型值
-                    result = Utility.handleCountyResponse(responseText,
-                            selectedCity.getId());
+                    result = Utility.handleCountyResponse(responseText, selectedCity.getId());
                 }
                 //如果解析返回的值为true,则将数据保存成功，则利用方法进行数据更新
                 if (result) {
@@ -290,6 +274,20 @@ public class ChooseAreaFragment extends Fragment {
                     });
                 }
             }
+
+
+            //失败的回调方法
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // 通过runOnUiThread()方法回到主线程处理逻辑
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        closeProgressDialog();
+                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         });
     }
 
@@ -299,7 +297,7 @@ public class ChooseAreaFragment extends Fragment {
     private void showProgressDialog() {
         if (progressDialog == null) {
             progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setMessage("正在加载中...");
+            progressDialog.setMessage("正在加载...");
             progressDialog.setCanceledOnTouchOutside(false);
         }
         progressDialog.show();
@@ -313,6 +311,4 @@ public class ChooseAreaFragment extends Fragment {
             progressDialog.dismiss();
         }
     }
-
 }
-
